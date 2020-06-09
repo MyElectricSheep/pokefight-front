@@ -2,22 +2,43 @@ import React, { useState, useEffect } from "react";
 import { Route, Switch, useHistory, useLocation } from "react-router-dom";
 import BottomNavBar from "./components/BottomNav";
 import Pokedex from "./components/Pokedex";
-import Pokeplay from "./components/Pokeplay"
+import Pokeplay from "./components/Pokeplay";
 import Grid from "@material-ui/core/Grid";
-import Typography from '@material-ui/core/Typography';
+import Typography from "@material-ui/core/Typography";
+import Button from "@material-ui/core/Button";
+import Authenticate from "./components/Authenticate";
+import axios from "axios";
 import "./App.css";
+import Cookies from "js-cookie";
 
 const App = () => {
+  if (process.env.NODE_ENV === "development") {
+    axios.defaults.baseURL = process.env.REACT_APP_BACKEND_API_LOCAL;
+  } else {
+    axios.defaults.baseURL = process.env.REACT_APP_BACKEND_API;
+  }
+
   const history = useHistory();
   const navIndex = ["/pokedex", "/play", "/leaderboard"];
 
   const [bottomNavValue, setBottomNavValue] = useState(0);
 
   const [chosenPokemon, setChosenPokemon] = useState(null);
-  const [chosenPokemonSprites, setChosenPokemonSprites] = useState(null)
+  const [chosenPokemonSprites, setChosenPokemonSprites] = useState(null);
 
-  const [randomOpponent, setRandomOpponent] = useState(null)
-  const [opponentPokemonSprites, setOpponentPokemonSprites] = useState(null)
+  const [randomOpponent, setRandomOpponent] = useState(null);
+  const [opponentPokemonSprites, setOpponentPokemonSprites] = useState(null);
+
+  const [hasLoggedIn, setHasLoggedIn] = useState(false);
+  const [loggedInPlayer, setLoggedInPlayer] = useState(null);
+
+  const [openAuth, setOpenAuth] = useState(false);
+  const [authData, setAuthData] = useState({
+    username: "",
+    email: "",
+    password: "",
+  });
+  const [authType, setAuthType] = useState(null);
 
   const handleChoosePokemon = (pokemon) => {
     setChosenPokemon(pokemon);
@@ -25,66 +46,117 @@ const App = () => {
   };
 
   useEffect(() => {
-    console.log(chosenPokemon)
-    if (chosenPokemon) {
-      fetch(`https://pokeapi.co/api/v2/pokemon/${chosenPokemon.name.english.toLowerCase()}`)
-      .then(res => res.json())
-      .then(data => setChosenPokemonSprites(data.sprites))
-      .catch(err => console.log(err))
+    const token = Cookies.get("pokefight-token");
+    if (token) {
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      axios
+        .get(`auth/me`)
+        .then((response) => {
+          setLoggedInPlayer(response.data);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } else setLoggedInPlayer(null);
+  }, [hasLoggedIn]);
 
-      const randomOpponentId = Math.floor(Math.random() * Math.floor(809))
+  useEffect(() => {
+    if (chosenPokemon) {
+      fetch(
+        `https://pokeapi.co/api/v2/pokemon/${chosenPokemon.name.english.toLowerCase()}`
+      )
+        .then((res) => res.json())
+        .then((data) => setChosenPokemonSprites(data.sprites))
+        .catch((err) => console.log(err));
+
+      const randomOpponentId = Math.floor(Math.random() * Math.floor(809));
       fetch(`/pokemon/${randomOpponentId}`)
-      .then((res) => res.json())
-      .then((data) => { 
-        setRandomOpponent(data) 
-        return fetch(`https://pokeapi.co/api/v2/pokemon/${data.name.english.toLowerCase()}`) 
-      })
-      .then(res => res.json())
-      .then(data => setOpponentPokemonSprites(data.sprites))
-      .catch(() => alert("No Pokemon matches that ID"));
+        .then((res) => res.json())
+        .then((data) => {
+          setRandomOpponent(data);
+          return fetch(
+            `https://pokeapi.co/api/v2/pokemon/${data.name.english.toLowerCase()}`
+          );
+        })
+        .then((res) => res.json())
+        .then((data) => setOpponentPokemonSprites(data.sprites))
+        .catch(() => alert("No Pokemon matches that ID"));
     }
-  }, [chosenPokemon])
+  }, [chosenPokemon]);
 
   let location = useLocation();
 
+  const handleClickOpenAuth = (type) => {
+    setAuthType(type);
+    setOpenAuth(true);
+  };
+
+  const cleanAuthData = () =>
+    setAuthData({
+      username: "",
+      email: "",
+      password: "",
+    });
+
+  const handleClickCloseAuth = () => {
+    setOpenAuth(false);
+    cleanAuthData();
+  };
+
+  const handleChangeInput = (e) => {
+    setAuthData((prevState) => ({
+      ...prevState,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  const authError = () => {
+    cleanAuthData();
+    return alert("Wrong credentials, please try again");
+  };
+
+  const handleSubmitAuth = (type) => {
+    const { username, email, password } = authData;
+    if (!authData || !email || !password || (type === "register" && !username))
+      return alert("Please enter your credentials");
+    axios
+      .post(`auth/${type}`, {
+        username,
+        email,
+        password,
+      })
+      .then((response) => {
+        const token = response.headers["x-auth-token"];
+        if (!token) return authError();
+        Cookies.set("pokefight-token", token);
+        handleClickCloseAuth();
+        setHasLoggedIn(true);
+      })
+      .catch((error) => {
+        return authError();
+      });
+  };
+
   useEffect(() => {
-    console.log(location.pathname);
     setBottomNavValue(navIndex.indexOf(location.pathname));
   }, [navIndex, location]);
 
-
-  // const [targetInfo, setTargetInfo] = useState("name");
-  // const [halfPoke, setHalfPoke] = useState(null);
-  
-  // const fetchOnePokemonSpecificInfo = (id) => {
-  //   resetView()
-  //   if (!id || !/^\d+$/.test(id)) return alert('Please enter the ID of a pokemon...')
-  //   fetch(`/pokemon/${id}/${targetInfo}`)
-  //     .then(res => res.json())
-  //     .then(data => setHalfPoke(data))
-  //     .catch(() => alert('No Pokemon matches that ID'))
-  // }
-
   return (
     <Grid container direction="column" justify="center" alignItems="center">
-      <Typography gutterBottom variant="h2">POKEFIGHT</Typography>
-
-      {/* 
-          {halfPoke && (
-            <>
-            <span style={{marginTop: '2em'}}>{`Here are the ${targetInfo} characteristics for this Pokemon:`}</span>
-            {Object.keys(halfPoke).map(key => {
-            return <span>{key}: {halfPoke[key]}</span>
-          })}
-            </>
-          )} */}
-
+      <Typography gutterBottom variant="h2">
+        POKEFIGHT
+      </Typography>
       <Switch>
         <Route path="/pokedex">
           <Pokedex onChoosePokemon={handleChoosePokemon} />
         </Route>
         <Route path="/play">
-          <Pokeplay chosenPokemon={chosenPokemon} chosenPokemonSprites={chosenPokemonSprites} randomOpponent={randomOpponent} opponentPokemonSprites={opponentPokemonSprites}/>
+          <Pokeplay
+            chosenPokemon={chosenPokemon}
+            chosenPokemonSprites={chosenPokemonSprites}
+            randomOpponent={randomOpponent}
+            opponentPokemonSprites={opponentPokemonSprites}
+          />
         </Route>
       </Switch>
 
@@ -92,6 +164,41 @@ const App = () => {
         bottomNavValue={bottomNavValue}
         setBottomNavValue={setBottomNavValue}
         navIndex={navIndex}
+      />
+      <Grid
+        container
+        direction={hasLoggedIn ? "column" : "row"}
+        justify="center"
+        alignItems="center"
+      >
+        {loggedInPlayer ? (
+          <>
+            <>{`Welcome back ${loggedInPlayer.username}`}</>{" "}
+            <Button
+              onClick={() => {
+                Cookies.remove("pokefight-token");
+                setHasLoggedIn(false);
+              }}
+            >
+              LOGOUT
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button onClick={() => handleClickOpenAuth("register")}>
+              REGISTER
+            </Button>
+            <Button onClick={() => handleClickOpenAuth("login")}>LOGIN</Button>
+          </>
+        )}
+      </Grid>
+      <Authenticate
+        type={authType}
+        openAuth={openAuth}
+        authData={authData}
+        onClose={handleClickCloseAuth}
+        onChangeAuth={handleChangeInput}
+        onSendAuth={handleSubmitAuth}
       />
     </Grid>
   );

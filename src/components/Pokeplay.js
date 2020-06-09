@@ -4,6 +4,7 @@ import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
 import PokeDisplay from "./PokeDisplay";
 import Typography from "@material-ui/core/Typography";
+import Button from '@material-ui/core/Button';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -74,9 +75,17 @@ export default function SpacingGrid({
                   </Paper>
                 </Grid>
                 {index !== array.length - 1 && (
+                  <Grid
+                  item
+                >
                   <Typography gutterBottom variant="h2">
                     VS
                   </Typography>
+                  <br/>
+                  <Button variant="contained" color="secondary">
+  Fight
+</Button>
+                  </Grid>
                 )}
               </>
             ))}
