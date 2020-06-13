@@ -72,7 +72,7 @@ export default function ResponsiveDialog({ open, onClose, onChoosePokemon }) {
             Cancel
           </Button>
           {fullPoke &&<Button onClick={() => onChoosePokemon(fullPoke)} color="primary" autoFocus>
-            {`Choose ${fullPoke.name.english}`}
+            {`${fullPoke.name.english}, I choose you!`}
           </Button>}
         </DialogActions>
       </Dialog>

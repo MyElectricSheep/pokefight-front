@@ -1,23 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { Route, Switch, useHistory, useLocation } from "react-router-dom";
+import { Route, Switch, Redirect, useHistory, useLocation } from "react-router-dom";
 import BottomNavBar from "./components/BottomNav";
 import Pokedex from "./components/Pokedex";
 import Pokeplay from "./components/Pokeplay";
+import Pokeboard from "./components/PokeBoard"
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
 import Authenticate from "./components/Authenticate";
-import axios from "axios";
+import pokeClient from "./utils/client"
 import "./App.css";
 import Cookies from "js-cookie";
 
 const App = () => {
-  if (process.env.NODE_ENV === "development") {
-    axios.defaults.baseURL = process.env.REACT_APP_BACKEND_API_LOCAL;
-  } else {
-    axios.defaults.baseURL = process.env.REACT_APP_BACKEND_API;
-  }
-
   const history = useHistory();
   const navIndex = ["/pokedex", "/play", "/leaderboard"];
 
@@ -48,8 +43,7 @@ const App = () => {
   useEffect(() => {
     const token = Cookies.get("pokefight-token");
     if (token) {
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      axios
+      pokeClient
         .get(`auth/me`)
         .then((response) => {
           setLoggedInPlayer(response.data);
@@ -119,7 +113,7 @@ const App = () => {
     const { username, email, password } = authData;
     if (!authData || !email || !password || (type === "register" && !username))
       return alert("Please enter your credentials");
-    axios
+    pokeClient
       .post(`auth/${type}`, {
         username,
         email,
@@ -157,6 +151,14 @@ const App = () => {
             randomOpponent={randomOpponent}
             opponentPokemonSprites={opponentPokemonSprites}
           />
+        </Route>
+        <Route path="/leaderboard">
+          <Pokeboard
+            loggedInPlayer={loggedInPlayer}
+          />
+        </Route>
+        <Route exact path="/">
+          {hasLoggedIn ? <Redirect to="/leaderboard" /> : <Redirect to="/pokedex" />}
         </Route>
       </Switch>
 
