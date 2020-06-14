@@ -1,9 +1,6 @@
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
-import Grid from "@material-ui/core/Grid";
-import Paper from "@material-ui/core/Paper";
-import Typography from "@material-ui/core/Typography";
-import ButtonBase from "@material-ui/core/ButtonBase";
+import { Grid, Typography, ButtonBase } from "@material-ui/core";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
 
@@ -29,10 +26,8 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function ComplexGrid({ chosenPokemonSprites, chosenPokemon }) {
+const PokeDisplay = ({ chosenPokemonSprites, chosenPokemon }) => {
   const classes = useStyles();
-
-  console.log(chosenPokemon);
 
   return (
     <div className={classes.root}>
@@ -100,4 +95,6 @@ export default function ComplexGrid({ chosenPokemonSprites, chosenPokemon }) {
       )}
     </div>
   );
-}
+};
+
+export default PokeDisplay;

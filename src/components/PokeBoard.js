@@ -1,16 +1,23 @@
-import React, { useEffect } from 'react';
-import { withStyles, makeStyles } from '@material-ui/core/styles';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import Paper from '@material-ui/core/Paper';
-import Grid from "@material-ui/core/Grid";
-import pokeClient from "../utils/client"
+import React, { useEffect, useState } from "react";
+import { withStyles, makeStyles } from "@material-ui/core/styles";
 
-const StyledTableCell = withStyles((theme) => ({
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Grid,
+  Switch,
+  FormControlLabel,
+} from "@material-ui/core";
+
+import pokeClient from "../utils/client";
+import { DateTime } from "luxon";
+
+const CustomCell = withStyles((theme) => ({
   head: {
     backgroundColor: theme.palette.common.black,
     color: theme.palette.common.white,
@@ -20,25 +27,13 @@ const StyledTableCell = withStyles((theme) => ({
   },
 }))(TableCell);
 
-const StyledTableRow = withStyles((theme) => ({
+const CustomRow = withStyles((theme) => ({
   root: {
-    '&:nth-of-type(odd)': {
+    "&:nth-of-type(odd)": {
       backgroundColor: theme.palette.action.hover,
     },
   },
 }))(TableRow);
-
-function createData(name, calories, fat, carbs, protein) {
-  return { name, calories, fat, carbs, protein };
-}
-
-const rows = [
-  createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
-  createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
-  createData('Eclair', 262, 16.0, 24, 6.0),
-  createData('Cupcake', 305, 3.7, 67, 4.3),
-  createData('Gingerbread', 356, 16.0, 49, 3.9),
-];
 
 const useStyles = makeStyles({
   table: {
@@ -46,51 +41,122 @@ const useStyles = makeStyles({
   },
 });
 
-export default function CustomizedTables({loggedInPlayer}) {
+const PokeBoard = ({ loggedInPlayer, pokeData }) => {
   const classes = useStyles();
-  console.log(loggedInPlayer)
+
+  const [global, setGlobal] = useState(false);
+  const [dataToDisplay, setDataToDisplay] = useState(null);
 
   useEffect(() => {
-    pokeClient.get('/board/all').then(res => console.log(res.data))
-  }, [])
+    if (global) {
+      pokeClient.get("/board/ranking").then((res) => {
+        setDataToDisplay(res.data);
+      }).catch(err => console.error(err));
+    } else {
+      if (loggedInPlayer) {
+        setDataToDisplay(loggedInPlayer.games);
+      }
+    }
+  }, [loggedInPlayer, global]);
+
+  const handlePokeName = (id) => {
+    if (!id) return "Unknown Pokemon";
+    const targetPoke = pokeData.find((p) => p.id === id);
+    if (targetPoke) return targetPoke.name.english;
+    else return "Unknown Pokemon";
+  };
+
+  const handleFlipSwitch = () => {
+    setGlobal((global) => !global);
+  };
 
   return (
     <Grid
-    container
-    direction="row"
-    justify="center"
-    alignItems="center"
-    spacing={4}
-  >
-  <Grid item xs={11} md={6}>
-    <TableContainer component={Paper}>
-      <Table className={classes.table} aria-label="customized table">
-        <TableHead>
-          <TableRow>
-            <StyledTableCell>Dessert (100g serving)</StyledTableCell>
-            <StyledTableCell align="right">Calories</StyledTableCell>
-            <StyledTableCell align="right">Fat&nbsp;(g)</StyledTableCell>
-            <StyledTableCell align="right">Carbs&nbsp;(g)</StyledTableCell>
-            <StyledTableCell align="right">Protein&nbsp;(g)</StyledTableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {rows.map((row) => (
-            <StyledTableRow key={row.name}>
-              <StyledTableCell component="th" scope="row">
-                {row.name}
-              </StyledTableCell>
-              <StyledTableCell align="right">{row.calories}</StyledTableCell>
-              <StyledTableCell align="right">{row.fat}</StyledTableCell>
-              <StyledTableCell align="right">{row.carbs}</StyledTableCell>
-              <StyledTableCell align="right">{row.protein}</StyledTableCell>
-            </StyledTableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
-    </Grid>
-    </Grid>
+      container
+      direction="row"
+      justify="center"
+      alignItems="center"
+      spacing={4}
+    >
+      <Grid item xs={11} md={7}>
+        <TableContainer component={Paper}>
+          <Table className={classes.table} aria-label="customized table">
+            <TableHead>
+              <TableRow>
+                <CustomCell>Player</CustomCell>
+                <CustomCell align="right">
+                  {global ? "Games played" : "Game Played On"}
+                </CustomCell>
+                <CustomCell align="right">
+                  {global ? "Wins" : "My Pokemon"}
+                </CustomCell>
+                <CustomCell align="right">
+                  {global ? "Losses" : "Against"}
+                </CustomCell>
+                <CustomCell align="right">
+                  {global ? "Rank" : "Result"}
+                </CustomCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {dataToDisplay &&
+                dataToDisplay.length &&
+                dataToDisplay.map((row, index) => {
+                  return (
+                    <CustomRow key={index}>
+                      <CustomCell component="th" scope="row">
+                        {global
+                          ? row.name
+                          : loggedInPlayer
+                          ? loggedInPlayer.username
+                          : "You"}
+                      </CustomCell>
+                      <CustomCell align="right">
+                        {global
+                          ? row.gamesPlayed
+                          : DateTime.fromISO(row.played_on).toLocaleString(
+                              DateTime.DATETIME_SHORT_WITH_SECONDS
+                            )}
+                      </CustomCell>
+                      <CustomCell align="right">
+                        {global
+                          ? row.gamesWon
+                          : handlePokeName(row.chosenPokemonId)}
+                      </CustomCell>
+                      <CustomCell align="right">
+                        {global
+                          ? row.gamesLost
+                          : handlePokeName(row.adversaryPokemonId)}
+                      </CustomCell>
+                      <CustomCell align="right">
+                        {global
+                          ? `#${row.rank}`
+                          : row.winner === false
+                          ? "Loss"
+                          : "Win"}
+                      </CustomCell>
+                    </CustomRow>
+                  );
+                })}
+            </TableBody>
+          </Table>
+        </TableContainer>
 
+        <FormControlLabel
+          control={
+            <Switch
+              checked={global}
+              onChange={handleFlipSwitch}
+              color="primary"
+              name="checked"
+              inputProps={{ "aria-label": "Switch to select leaderboard info" }}
+            />
+          }
+          label={global ? "Showing all players" : "Showing only my data"}
+        />
+      </Grid>
+    </Grid>
   );
 }
+
+export default PokeBoard

@@ -1,20 +1,32 @@
 import React, { useState, useEffect } from "react";
-import { Route, Switch, Redirect, useHistory, useLocation } from "react-router-dom";
+
+// Routing
+import {
+  Route,
+  Switch,
+  Redirect,
+  useHistory,
+  useLocation,
+} from "react-router-dom";
+
+// Custom components
 import BottomNavBar from "./components/BottomNav";
 import Pokedex from "./components/Pokedex";
 import Pokeplay from "./components/Pokeplay";
-import Pokeboard from "./components/PokeBoard"
-import Grid from "@material-ui/core/Grid";
-import Typography from "@material-ui/core/Typography";
-import Button from "@material-ui/core/Button";
+import Pokeboard from "./components/PokeBoard";
 import Authenticate from "./components/Authenticate";
-import pokeClient from "./utils/client"
-import "./App.css";
+
+// Utils
+import pokeClient from "./utils/client";
 import Cookies from "js-cookie";
+
+// Mui
+import { Grid, Typography, Button } from "@material-ui/core";
 
 const App = () => {
   const history = useHistory();
-  const navIndex = ["/pokedex", "/play", "/leaderboard"];
+
+  const [pokeData, setPokeData] = useState(null);
 
   const [bottomNavValue, setBottomNavValue] = useState(0);
 
@@ -35,10 +47,18 @@ const App = () => {
   });
   const [authType, setAuthType] = useState(null);
 
+  const navIndex = ["/pokedex", "/play", "/leaderboard"];
+
   const handleChoosePokemon = (pokemon) => {
     setChosenPokemon(pokemon);
     history.push("/play");
   };
+
+  useEffect(() => {
+    fetch("/pokemon")
+      .then((res) => res.json())
+      .then((data) => setPokeData(data));
+  }, []);
 
   useEffect(() => {
     const token = Cookies.get("pokefight-token");
@@ -142,7 +162,7 @@ const App = () => {
       </Typography>
       <Switch>
         <Route path="/pokedex">
-          <Pokedex onChoosePokemon={handleChoosePokemon} />
+          <Pokedex onChoosePokemon={handleChoosePokemon} pokeData={pokeData} />
         </Route>
         <Route path="/play">
           <Pokeplay
@@ -153,12 +173,14 @@ const App = () => {
           />
         </Route>
         <Route path="/leaderboard">
-          <Pokeboard
-            loggedInPlayer={loggedInPlayer}
-          />
+          <Pokeboard loggedInPlayer={loggedInPlayer} pokeData={pokeData} />
         </Route>
         <Route exact path="/">
-          {hasLoggedIn ? <Redirect to="/leaderboard" /> : <Redirect to="/pokedex" />}
+          {hasLoggedIn ? (
+            <Redirect to="/leaderboard" />
+          ) : (
+            <Redirect to="/pokedex" />
+          )}
         </Route>
       </Switch>
 
@@ -180,6 +202,8 @@ const App = () => {
               onClick={() => {
                 Cookies.remove("pokefight-token");
                 setHasLoggedIn(false);
+                setLoggedInPlayer(null);
+                history.push("/pokedex");
               }}
             >
               LOGOUT

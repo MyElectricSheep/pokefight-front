@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
-import Grid from "@material-ui/core/Grid";
-import Paper from "@material-ui/core/Paper";
+import { Grid, Paper, Typography, Button } from "@material-ui/core";
+import { Skeleton } from "@material-ui/lab";
 import PokeDisplay from "./PokeDisplay";
-import Typography from "@material-ui/core/Typography";
-import Button from "@material-ui/core/Button";
-import Skeleton from "@material-ui/lab/Skeleton";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -24,12 +21,12 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function SpacingGrid({
+const Pokeplay = ({
   chosenPokemon,
   chosenPokemonSprites,
   randomOpponent,
   opponentPokemonSprites,
-}) {
+}) => {
   const classes = useStyles();
 
   const [pokeImages, setPokeImages] = useState([]);
@@ -146,4 +143,6 @@ export default function SpacingGrid({
       <Grid item xs={12}></Grid>
     </Grid>
   );
-}
+};
+
+export default Pokeplay;

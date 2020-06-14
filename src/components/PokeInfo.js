@@ -1,20 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import Button from "@material-ui/core/Button";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import useMediaQuery from "@material-ui/core/useMediaQuery";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  useMediaQuery,
+} from "@material-ui/core";
 import { useTheme } from "@material-ui/core/styles";
 
-export default function ResponsiveDialog({ open, onClose, onChoosePokemon }) {
+const PokeInfo = ({ open, onClose, onChoosePokemon }) => {
   const theme = useTheme();
-  const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
-  const [fullPoke, setFullPoke] = useState(null);
-
   const { id } = useParams();
+  const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
+  const [fullPoke, setFullPoke] = useState(null);
 
   useEffect(() => {
     fetch(`/pokemon/${id}`)
@@ -23,17 +25,15 @@ export default function ResponsiveDialog({ open, onClose, onChoosePokemon }) {
       .catch(() => alert("No Pokemon matches that ID"));
   }, [id]);
 
-  console.log(fullPoke);
-
   return (
     <div>
       <Dialog
         fullScreen={fullScreen}
         open={open}
         onClose={onClose}
-        aria-labelledby="responsive-dialog-title"
+        aria-labelledby="PokeInfo-title"
       >
-        <DialogTitle id="responsive-dialog-title">
+        <DialogTitle id="PokeInfo-title">
           {fullPoke &&
             `Here's the data we have about ${fullPoke.name.english}:`}
         </DialogTitle>
@@ -71,11 +71,19 @@ export default function ResponsiveDialog({ open, onClose, onChoosePokemon }) {
           <Button autoFocus onClick={onClose} color="primary">
             Cancel
           </Button>
-          {fullPoke &&<Button onClick={() => onChoosePokemon(fullPoke)} color="primary" autoFocus>
-            {`${fullPoke.name.english}, I choose you!`}
-          </Button>}
+          {fullPoke && (
+            <Button
+              onClick={() => onChoosePokemon(fullPoke)}
+              color="primary"
+              autoFocus
+            >
+              {`${fullPoke.name.english}, I choose you!`}
+            </Button>
+          )}
         </DialogActions>
       </Dialog>
     </div>
   );
-}
+};
+
+export default PokeInfo;

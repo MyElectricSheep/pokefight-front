@@ -1,45 +1,35 @@
 import React, { useState, useEffect } from "react";
 import { Route, Link, useHistory } from "react-router-dom";
-import Skeleton from "@material-ui/lab/Skeleton";
+
 import { makeStyles } from "@material-ui/core/styles";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemAvatar from "@material-ui/core/ListItemAvatar";
-import PersonOutlineIcon from "@material-ui/icons/PersonOutline";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import FlashOnIcon from "@material-ui/icons/FlashOn";
-import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
-import ListItemText from "@material-ui/core/ListItemText";
-import Avatar from "@material-ui/core/Avatar";
-import IconButton from "@material-ui/core/IconButton";
-import FormGroup from "@material-ui/core/FormGroup";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Checkbox from "@material-ui/core/Checkbox";
-import Grid from "@material-ui/core/Grid";
-import Typography from "@material-ui/core/Typography";
-import FolderIcon from "@material-ui/icons/Folder";
-import DeleteIcon from "@material-ui/icons/Delete";
-import Pagination from "@material-ui/lab/Pagination";
+import {
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemSecondaryAction,
+  Avatar,
+  Grid,
+  Typography,
+  ListItemText,
+  IconButton,
+} from "@material-ui/core";
+import { PersonOutline, FlashOn } from "@material-ui/icons";
+import { Skeleton, Pagination } from "@material-ui/lab";
+
 import PokeInfo from "./PokeInfo";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   root: {
     flexGrow: 1,
     paddingTop: "1em",
     paddingBottom: "1em",
-    // maxWidth: 752,
-    // margin: '0 auto',
-  },
-  title: {
-    // margin: theme.spacing(4, 0, 2),
-  },
+  }
 }));
 
-const Pokedex = ({ onChoosePokemon }) => {
+const Pokedex = ({ onChoosePokemon, pokeData }) => {
   const classes = useStyles();
   const history = useHistory();
 
-  const [pokeData, setPokeData] = useState(null);
   const [page, setPage] = useState(1);
   const [open, setOpen] = useState(true);
   const [pokeImages, setPokeImages] = useState([]);
@@ -60,12 +50,6 @@ const Pokedex = ({ onChoosePokemon }) => {
   };
 
   useEffect(() => {
-    fetch("/pokemon")
-      .then((res) => res.json())
-      .then((data) => setPokeData(data));
-  }, []);
-
-  useEffect(() => {
     if (pokeData) {
       setPokeImages([]);
       const slicedPokeData = handleSlice(pokeData);
@@ -75,7 +59,10 @@ const Pokedex = ({ onChoosePokemon }) => {
         )
           .then((res) => res.json())
           .then((data) =>
-            setPokeImages((prevPokeImages) => [...prevPokeImages, {id: index, image: data.sprites}])
+            setPokeImages((prevPokeImages) => [
+              ...prevPokeImages,
+              { id: index, image: data.sprites },
+            ])
           )
           .catch((err) => console.log(err));
       });
@@ -92,14 +79,14 @@ const Pokedex = ({ onChoosePokemon }) => {
         spacing={2}
       >
         <Grid item xs={12} md={12}>
-          <Typography variant="h6" className={classes.title}>
+          <Typography variant="h6">
             Pokedex: the Pokemon Encyclopedia
           </Typography>
           <div className={classes.demo}>
             <List>
               {pokeData ? (
                 handleSlice(pokeData).map((p, index) => {
-                  const filteredPic = pokeImages.find(i => i.id === index)
+                  const filteredPic = pokeImages.find((i) => i.id === index);
                   return (
                     <ListItem key={p.id}>
                       <ListItemAvatar>
@@ -111,7 +98,7 @@ const Pokedex = ({ onChoosePokemon }) => {
                               alt="pokemon"
                             ></img>
                           ) : (
-                            <PersonOutlineIcon />
+                            <PersonOutline />
                           )}
                         </Avatar>
                       </ListItemAvatar>
@@ -125,7 +112,7 @@ const Pokedex = ({ onChoosePokemon }) => {
                             to={`/pokedex/${p.id}`}
                             onClick={() => setOpen(true)}
                           >
-                            <FlashOnIcon />
+                            <FlashOn />
                           </Link>
                         </IconButton>
                       </ListItemSecondaryAction>
@@ -136,7 +123,7 @@ const Pokedex = ({ onChoosePokemon }) => {
                 <>
                   {Array(20)
                     .fill()
-                    .map((a,i) => (
+                    .map((a, i) => (
                       <Skeleton
                         key={i}
                         animation="wave"
