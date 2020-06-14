@@ -3,12 +3,20 @@ import { makeStyles } from "@material-ui/core/styles";
 import { Grid, Paper, Typography, Button } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import PokeDisplay from "./PokeDisplay";
+import { useWindowSize } from 'react-use';
+import pokeClient from "../utils/client";
+import Confetti from 'react-confetti'
 
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
   },
   paper: {
+    height: 650,
+    width: 400,
+  },
+  paperDead: {
+    backgroundColor: 'black',
     height: 650,
     width: 400,
   },
@@ -26,10 +34,36 @@ const Pokeplay = ({
   chosenPokemonSprites,
   randomOpponent,
   opponentPokemonSprites,
+  loggedInPlayer
 }) => {
   const classes = useStyles();
+  const { width, height } = useWindowSize()
 
   const [pokeImages, setPokeImages] = useState([]);
+
+  const [winner, setWinner] = useState(null)
+
+  const saveGame = (type) => {
+    pokeClient.post('/board/save', {
+	      player: loggedInPlayer._id,
+        chosenPokemonId: chosenPokemon.id,
+        adversaryPokemonId: randomOpponent.id,
+        winner: type === 'winner' ? true : false
+    }).then(res => console.log(res.data))
+  }
+
+  const handleFight = () => {
+    const flipACoin = Math.round(Math.random() * 10)
+    if (flipACoin < 5) {
+      alert('You lose!')
+      setWinner('opponent')
+      loggedInPlayer && saveGame('loser')
+    } else {
+      alert('You win!')
+      setWinner('player')
+      loggedInPlayer && saveGame('winner')
+    }
+  }
 
   useEffect(() => {
     if (!chosenPokemon) {
@@ -54,6 +88,15 @@ const Pokeplay = ({
       );
     }
   }, [chosenPokemon]);
+
+  const handleWinClass = (index) => {
+    if (!winner) return classes.paper
+    if (winner === 'player' && index === 0) return classes.paper
+    if (winner === 'player' && index === 1) return classes.paperDead
+    if (winner === 'opponent' && index === 0) return classes.paperDead
+    if (winner === 'opponent' && index === 1) return classes.paper
+    else return classes.paper
+  }
 
   return (
     <Grid container className={classes.root} spacing={2}>
@@ -118,7 +161,7 @@ const Pokeplay = ({
             ].map((item, index, array) => (
               <>
                 <Grid key={item.pokemon.id} item>
-                  <Paper className={classes.paper}>
+                  <Paper className={handleWinClass(index)}>
                     <PokeDisplay
                       chosenPokemon={item.pokemon}
                       chosenPokemonSprites={item.sprites}
@@ -128,19 +171,29 @@ const Pokeplay = ({
                 {index !== array.length - 1 && (
                   <Grid item>
                     <Typography gutterBottom variant="h2">
-                      VS
+                      {!winner ? 'VS' : winner === 'player' ? 'You win!' : 'You lose!'}
                     </Typography>
                     <br />
-                    <Button variant="contained" color="secondary">
+                    <Typography gutterBottom variant="h5" align="center">
+                    {winner === 'player' && 'Great fight!'}
+                    {winner === 'opponent' && 'Better luck next time!'}
+                    </Typography>
+                    {!winner && <Button variant="contained" color="secondary" onClick={() => handleFight()}>
                       Fight
-                    </Button>
+                    </Button>}
                   </Grid>
                 )}
               </>
             ))}
         </Grid>
       </Grid>
-      <Grid item xs={12}></Grid>
+      {winner === 'player' && <Confetti
+      width={width}
+      height={height}
+      numberOfPieces={1000}
+      recycle={false}
+      tweenDuration={25000}
+    />}
     </Grid>
   );
 };

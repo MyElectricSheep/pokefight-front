@@ -70,6 +70,7 @@ const App = () => {
         })
         .catch((error) => {
           console.log(error);
+          setLoggedInPlayer(null);
         });
     } else setLoggedInPlayer(null);
   }, [hasLoggedIn]);
@@ -170,6 +171,7 @@ const App = () => {
             chosenPokemonSprites={chosenPokemonSprites}
             randomOpponent={randomOpponent}
             opponentPokemonSprites={opponentPokemonSprites}
+            loggedInPlayer={loggedInPlayer}
           />
         </Route>
         <Route path="/leaderboard">
