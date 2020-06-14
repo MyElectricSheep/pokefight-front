@@ -44,7 +44,7 @@ const useStyles = makeStyles({
 const PokeBoard = ({ loggedInPlayer, pokeData }) => {
   const classes = useStyles();
 
-  const [global, setGlobal] = useState(false);
+  const [global, setGlobal] = useState(true);
   const [dataToDisplay, setDataToDisplay] = useState(null);
 
   useEffect(() => {
@@ -142,7 +142,7 @@ const PokeBoard = ({ loggedInPlayer, pokeData }) => {
           </Table>
         </TableContainer>
 
-        <FormControlLabel
+        {loggedInPlayer && <FormControlLabel
           control={
             <Switch
               checked={global}
@@ -152,8 +152,8 @@ const PokeBoard = ({ loggedInPlayer, pokeData }) => {
               inputProps={{ "aria-label": "Switch to select leaderboard info" }}
             />
           }
-          label={global ? "Showing all players" : "Showing only my data"}
-        />
+          label={global ? "Show all players" : "Show only my data"}
+        />}
       </Grid>
     </Grid>
   );
