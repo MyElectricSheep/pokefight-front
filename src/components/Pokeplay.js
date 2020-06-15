@@ -4,7 +4,7 @@ import { Grid, Paper, Typography, Button } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import PokeDisplay from "./PokeDisplay";
 import { useWindowSize } from 'react-use';
-import pokeClient from "../utils/client";
+import { pokeClient } from "../utils/client";
 import Confetti from 'react-confetti'
 
 const useStyles = makeStyles((theme) => ({

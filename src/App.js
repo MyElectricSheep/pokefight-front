@@ -17,7 +17,7 @@ import Pokeboard from "./components/PokeBoard";
 import Authenticate from "./components/Authenticate";
 
 // Utils
-import pokeClient from "./utils/client";
+import { pokeClient, refresh } from "./utils/client";
 import Cookies from "js-cookie";
 
 // Mui
@@ -65,6 +65,7 @@ const App = () => {
   useEffect(() => {
     const token = Cookies.get("pokefight-token");
     if (token) {
+      refresh()
       pokeClient
         .get(`auth/me`)
         .then((response) => {
@@ -104,6 +105,8 @@ const App = () => {
   let location = useLocation();
 
   const handleClickOpenAuth = (type) => {
+    Cookies.remove("pokefight-token");
+    setLoggedInPlayer(null);
     setAuthType(type);
     setOpenAuth(true);
   };
@@ -146,7 +149,10 @@ const App = () => {
         const token = response.headers["x-auth-token"];
         if (!token) return authError();
         Cookies.set("pokefight-token", token);
+        refresh()
         handleClickCloseAuth();
+      })
+      .finally(() => {
         setHasLoggedIn(true);
       })
       .catch((error) => {
@@ -201,7 +207,7 @@ const App = () => {
         justify="center"
         alignItems="center"
       >
-        {loggedInPlayer ? (
+        {hasLoggedIn && loggedInPlayer ? (
           <>
             <>{`Welcome back ${loggedInPlayer.username}`}</>{" "}
             <Button

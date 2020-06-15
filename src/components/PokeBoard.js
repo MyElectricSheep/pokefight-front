@@ -14,7 +14,7 @@ import {
   FormControlLabel,
 } from "@material-ui/core";
 
-import pokeClient from "../utils/client";
+import { pokeClient } from "../utils/client";
 import { DateTime } from "luxon";
 
 const CustomCell = withStyles((theme) => ({
