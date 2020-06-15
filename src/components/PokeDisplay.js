@@ -62,9 +62,9 @@ const PokeDisplay = ({ chosenPokemonSprites, chosenPokemon }) => {
                 </TabList>
 
                 <TabPanel>
-                  {Object.keys(chosenPokemon.base).map((key) => {
+                  {Object.keys(chosenPokemon.base).map((key, index) => {
                     return (
-                      <p>
+                      <p key={`${key}-${index}`}>
                         {key}: {chosenPokemon.base[key]}
                       </p>
                     );
@@ -74,15 +74,15 @@ const PokeDisplay = ({ chosenPokemonSprites, chosenPokemon }) => {
                   <Typography variant="body2" gutterBottom>
                     {chosenPokemon.type &&
                       chosenPokemon.type.length &&
-                      chosenPokemon.type.map((type) => {
-                        return <p>{type}</p>;
+                      chosenPokemon.type.map((type, index) => {
+                        return <p key={`${type}-${index}`}>{type}</p>;
                       })}
                   </Typography>
                 </TabPanel>
                 <TabPanel>
-                  {Object.keys(chosenPokemon.name).map((key) => {
+                  {Object.keys(chosenPokemon.name).map((key, index) => {
                     return (
-                      <p>
+                      <p key={`${key}-${index}`}>
                         {key}: {chosenPokemon.name[key]}
                       </p>
                     );

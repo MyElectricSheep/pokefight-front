@@ -107,10 +107,9 @@ const Pokedex = ({ onChoosePokemon, pokeData }) => {
                         primary={p.name.english}
                       />
                       <ListItemSecondaryAction>
-                        <IconButton edge="end" aria-label="choose">
+                        <IconButton edge="end" aria-label="choose" onClick={() => setOpen(true)}>
                           <Link
                             to={`/pokedex/${p.id}`}
-                            onClick={() => setOpen(true)}
                           >
                             <FlashOn />
                           </Link>

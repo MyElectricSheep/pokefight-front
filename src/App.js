@@ -39,6 +39,8 @@ const App = () => {
   const [hasLoggedIn, setHasLoggedIn] = useState(false);
   const [loggedInPlayer, setLoggedInPlayer] = useState(null);
 
+  const [gamePlayed, setGamePlayed] = useState(0)
+
   const [openAuth, setOpenAuth] = useState(false);
   const [authData, setAuthData] = useState({
     username: "",
@@ -73,7 +75,7 @@ const App = () => {
           setLoggedInPlayer(null);
         });
     } else setLoggedInPlayer(null);
-  }, [hasLoggedIn]);
+  }, [hasLoggedIn, gamePlayed]);
 
   useEffect(() => {
     if (chosenPokemon) {
@@ -172,6 +174,8 @@ const App = () => {
             randomOpponent={randomOpponent}
             opponentPokemonSprites={opponentPokemonSprites}
             loggedInPlayer={loggedInPlayer}
+            gamePlayed={gamePlayed}
+            setGamePlayed={setGamePlayed}
           />
         </Route>
         <Route path="/leaderboard">

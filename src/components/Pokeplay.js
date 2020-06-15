@@ -34,7 +34,8 @@ const Pokeplay = ({
   chosenPokemonSprites,
   randomOpponent,
   opponentPokemonSprites,
-  loggedInPlayer
+  loggedInPlayer,
+  setGamePlayed
 }) => {
   const classes = useStyles();
   const { width, height } = useWindowSize()
@@ -49,7 +50,7 @@ const Pokeplay = ({
         chosenPokemonId: chosenPokemon.id,
         adversaryPokemonId: randomOpponent.id,
         winner: type === 'winner' ? true : false
-    }).then(res => console.log(res.data))
+    }).then(() => setGamePlayed(gamePlayed => gamePlayed + 1))
   }
 
   const handleFight = () => {
@@ -57,11 +58,15 @@ const Pokeplay = ({
     if (flipACoin < 5) {
       alert('You lose!')
       setWinner('opponent')
-      loggedInPlayer && saveGame('loser')
+      if (loggedInPlayer) {
+        saveGame('loser')
+      }
     } else {
       alert('You win!')
       setWinner('player')
-      loggedInPlayer && saveGame('winner')
+      if (loggedInPlayer) {
+        saveGame('winner')
+      }
     }
   }
 
@@ -128,8 +133,9 @@ const Pokeplay = ({
                     alignItems="center"
                   >
                     {!pokeImages.length
-                      ? Array.from({ length: 20 }).map((i) => (
+                      ? Array.from({ length: 20 }).map((e, i) => (
                           <Skeleton
+                            key={i}
                             variant="circle"
                             width={70}
                             height={70}
@@ -159,8 +165,8 @@ const Pokeplay = ({
               { pokemon: chosenPokemon, sprites: chosenPokemonSprites },
               { pokemon: randomOpponent, sprites: opponentPokemonSprites },
             ].map((item, index, array) => (
-              <>
-                <Grid key={item.pokemon.id} item>
+              <React.Fragment key={item.pokemon.id}>
+                <Grid item>
                   <Paper className={handleWinClass(index)}>
                     <PokeDisplay
                       chosenPokemon={item.pokemon}
@@ -183,7 +189,7 @@ const Pokeplay = ({
                     </Button>}
                   </Grid>
                 )}
-              </>
+              </React.Fragment>
             ))}
         </Grid>
       </Grid>

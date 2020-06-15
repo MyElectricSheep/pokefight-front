@@ -42,9 +42,9 @@ const PokeInfo = ({ open, onClose, onChoosePokemon }) => {
             {fullPoke && (
               <>
                 <h3>Names</h3>
-                {Object.keys(fullPoke.name).map((key) => {
+                {Object.keys(fullPoke.name).map((key, index) => {
                   return (
-                    <p>
+                    <p key={`${key}-${index}`}>
                       {key}: {fullPoke.name[key]}
                     </p>
                   );
@@ -52,13 +52,13 @@ const PokeInfo = ({ open, onClose, onChoosePokemon }) => {
                 <h3>Type</h3>
                 {fullPoke.type &&
                   fullPoke.type.length &&
-                  fullPoke.type.map((type) => {
-                    return <p>{type}</p>;
+                  fullPoke.type.map((type, index) => {
+                    return <p key={`${type}-${index}`}>{type}</p>;
                   })}
                 <h3>Base</h3>
-                {Object.keys(fullPoke.base).map((key) => {
+                {Object.keys(fullPoke.base).map((key, index) => {
                   return (
-                    <p>
+                    <p key={`${key}-${index}`}>
                       {key}: {fullPoke.base[key]}
                     </p>
                   );
