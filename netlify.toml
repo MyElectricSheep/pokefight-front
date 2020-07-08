@@ -1,0 +1,17 @@
+# API specific routes
+[[redirects]]
+  from = "/pokemon"
+  to = "https://pokefight-wbs.herokuapp.com/pokemon"
+
+[[redirects]]
+  from = "/pokemon/:id"
+  to = "https://pokefight-wbs.herokuapp.com/pokemon/:id"
+
+[[redirects]]
+  from = "/pokemon/:id/:info"
+  to = "https://pokefight-wbs.herokuapp.com/pokemon/:id/:info"
+
+# Catch all redirects route
+[[redirects]]
+  from = "/*"
+  to = "/index.html"

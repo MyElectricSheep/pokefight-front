@@ -49,6 +49,7 @@ const PokeBoard = ({ loggedInPlayer, pokeData }) => {
 
   useEffect(() => {
     if (global) {
+      
       pokeClient.get("/board/ranking").then((res) => {
         setDataToDisplay(res.data);
       }).catch(err => console.error(err));
@@ -67,6 +68,7 @@ const PokeBoard = ({ loggedInPlayer, pokeData }) => {
   };
 
   const handleFlipSwitch = () => {
+    if (!loggedInPlayer.games || !loggedInPlayer.games.length) return alert('No personal data to display, you haven\'t played any games yet!')
     setGlobal((global) => !global);
   };
 
